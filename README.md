@@ -1,10 +1,10 @@
 # The Endless Shooter
 
 ## What works at the moment
-* Player can rotate based on the mouse's position
-* Player can move while pointing towards the mouse pointer
+* Player can rotate based on the mouse's position.
+* Player can move while pointing towards the mouse pointer.
 * Player can aim in any direction and fire bullets based on where they are pointing towards.
-* Player can be contolled using a controller (**Note**: Tested using only a **PS4 controller**).
+* Player can be controlled using a controller (**Note**: Tested using only a **PS4 controller**).
 * Bullets' collision with makeshift blocks can be detected, resulting in both being removed.
 
 ## Alert: There are things that are yet to be implemented
