@@ -1,5 +1,10 @@
 # The Endless Shooter
 
+*"Everything that lives is designed to end. We are perpetually trapped in a never-ending spiral of life and death. Is this a curse? Or some kind of punishment? I often think about the god who blessed us with this cryptic puzzle... and wonder if we'll ever get the chance to kill him"* - 2B, NieR:Automata
+
+## Author
+Varun Peesapati
+
 ## What works at the moment
 * Player can rotate based on the mouse's position.
 * Player can move while pointing towards the mouse pointer.
