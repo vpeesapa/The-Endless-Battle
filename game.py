@@ -444,6 +444,20 @@ while not exit_game:
 
 				dead_list.remove(dead_bullet)
 
+	# Checking if the bullets are going out-of-bounds
+	for bullet in bullet_list:
+		if bullet.x <= 0 or bullet.x >= window_width or bullet.y <= 0 or bullet.y >= window_height:
+			bullet_list.remove(bullet)
+
+	for dead_bullet in dead_list:
+		if dead_bullet.x <= 0 or dead_bullet.x >= window_width or dead_bullet.y <= 0 or dead_bullet.y >= window_height:
+			dead_list.remove(dead_bullet)
+
+	for enemy in enemy_list:
+		for enemy_bullet in enemy.bullet_list:
+			if enemy_bullet.x <= 0 or enemy_bullet.x >= window_width or enemy_bullet.y <= 0 or enemy_bullet.y >= window_height:
+				enemy.bullet_list.remove(enemy_bullet)
+
 	# If there are less than 10 enemies on the screen, create a new enemy
 	if len(enemy_list) == 0:
 		enemy_list.append(Enemy(Colors["blue"]))
