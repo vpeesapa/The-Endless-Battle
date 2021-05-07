@@ -19,8 +19,8 @@ ps4_controller = {
 }
 
 # 0:left analog horizontal,1:left analog vertical,
-# 2: right analog horizontal,3:right analog vertical,
-# 4:R2,5:L2
+# 3: right analog horizontal,4:right analog vertical,
+# 2:L2,5:R2
 ps4_analog = {
     0:0,
     1:0,
