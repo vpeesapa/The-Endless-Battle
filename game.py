@@ -125,6 +125,7 @@ clock = pygame.time.Clock()
 # --Global Variables--
 bullet_list = []
 enemy_list = []
+dead_list = []
 
 shooting = False
 go_up = False
@@ -420,7 +421,7 @@ while not exit_game:
 
 				# If there are bullets fired by the enemy on the screen, they should not be destroyed even if the enemy is destroyed
 				if len(enemy.bullet_list) != 0:
-					bullet_list.extend(enemy.bullet_list)
+					dead_list.extend(enemy.bullet_list)
 
 				enemy_list.remove(enemy)
 
@@ -435,10 +436,17 @@ while not exit_game:
 
 					enemy.bullet_list.remove(enemy_bullet)
 
+	for bullet in bullet_list:
+		for dead_bullet in dead_list:
+			if bulletsHit(bullet,dead_bullet):
+				if bullet in bullet_list:
+					bullet_list.remove(bullet)
+
+				dead_list.remove(dead_bullet)
+
 	# If there are less than 10 enemies on the screen, create a new enemy
-	# if len(block_list) == 0:
-	# 	for i in range(1,random.randint(2,11)):
-	# 		createEnemyBlock()
+	if len(enemy_list) == 0:
+		enemy_list.append(Enemy(Colors["blue"]))
 
 	# --Drawing all the components on the screen
 	window.fill(Colors["black"])
@@ -464,6 +472,9 @@ while not exit_game:
 		for enemy_bullet in enemy.bullet_list:
 			pygame.draw.circle(window,enemy_bullet.color,(enemy_bullet.x,enemy_bullet.y),enemy_bullet.radius)
 
+	for dead_bullet in dead_list:
+		pygame.draw.circle(window,dead_bullet.color,(dead_bullet.x,dead_bullet.y),dead_bullet.radius)
+
 	# Updating the screen with whatever has been drawn so
 	for bullet in bullet_list:
 		bullet.update()
@@ -471,6 +482,9 @@ while not exit_game:
 	for enemy in enemy_list:
 		for enemy_bullet in enemy.bullet_list:
 			enemy_bullet.update()
+
+	for dead_bullet in dead_list:
+		dead_bullet.update()
 
 	# Updating the enemies
 	for enemy in enemy_list:
