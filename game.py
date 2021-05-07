@@ -33,20 +33,72 @@ class Bullet:
 class Enemy:
 
 	# Parametrised constructor that initializes the enemy
-	def __init__(self):
+	def __init__(self,color):
 		self.x = 0
 		self.y = 0
+		self.color = color
+		self.surface = pygame.Surface(surface_size)
+		self.new_surface = self.surface
+		self.new_surface_rect = self.surface.get_rect()
+		self.position = (0,0)
+
+		# Type == 1 means the enemy will be relentlessly following the player while also shooting at them
+		# Type == 2 means the enemy will be shooting radially in four directions while rotating about a fixed point
+		self.type = 1
+
+		self.bullet_list = []
+		self.start_bullet_timer = pygame.time.get_ticks()
+		# Enemy fires a bullet at the player every 0.3 seconds
+		self.bullet_frequency = 300
 
 		self.randomize_position()
+
+		if self.type == 1:
+			self.points = ((surface_width / 2,0),(0,surface_height),(surface_width,surface_height))
+			self.velocity = 0.5
 
 	# Function that randomizes the position of the enemy on the main display
 	def randomize_position(self):
 		while True:
-			self.x = random.randint(0,window_width - 20)
-			self.y = random.randint(0,window_height - 20)
+			self.x = random.randint(surface_width,window_width - surface_width)
+			self.y = random.randint(surface_height,window_height - surface_height)
 
-			if not (window_center[0] - 15 <= self.x <= window_center[0] + 15 and window_center[1] - 15 <= self.y <= window_center[1] + 15):
+			player_radius = surface_width / math.sqrt(2)
+
+			x_clashing = surface_pos[0] - player_radius <= self.x <= surface_pos[0] + player_radius
+			y_clashing = surface_pos[1] - player_radius <= self.y <= surface_pos[1] + player_radius
+
+			if not (x_clashing and y_clashing):
+				self.position = (self.x,self.y)
 				break
+
+	# Function that updates the enemy
+	def update(self):
+		if self.type == 1:
+			dx = surface_pos[0] - self.x
+			dy = surface_pos[1] - self.y
+
+			angle = math.atan2(dy,dx)
+
+			x_change = math.cos(angle) * self.velocity
+			y_change = math.sin(angle) * self.velocity
+
+			# Updating the position of the enemy accordingly
+			self.x += x_change
+			self.y += y_change
+
+			# Checking if the enemy is going out-of-bounds
+			if self.x - (surface_width / 2) <= 0:
+				self.x = surface_width / 2
+			elif self.x + (surface_width / 2) >= window_width:
+				self.x = window_width - (surface_width / 2)
+
+			if self.y - (surface_height / 2) <= 0:
+				self.y = surface_height / 2
+			elif self.y + (surface_height / 2) >= window_height:
+				self.y = window_height - (surface_height / 2)
+
+			self.position = (self.x,self.y)
 
 # Initialize the game engine
 pygame.init()
@@ -72,7 +124,7 @@ clock = pygame.time.Clock()
 
 # --Global Variables--
 bullet_list = []
-block_list = []
+enemy_list = []
 
 shooting = False
 go_up = False
@@ -112,23 +164,26 @@ if use_ps4_controller:
 	analog_axes = ps4_analog.copy()
 
 # Function that creates the enemy block
-def createEnemyBlock():
-	while True:
-		enemy = Enemy()
-		r = pygame.Rect(enemy.x,enemy.y,20,20)
-
-		if len(block_list) != 0:
-			if r.collidelist(block_list) == -1:
-				block_list.append(r)
-				return
-		else:
-			block_list.append(r)
+# def createEnemyBlock():
+# 	while True:
+# 		enemy = Enemy()
+# 		r = pygame.Rect(enemy.x,enemy.y,20,20)
+#
+# 		if len(block_list) != 0:
+# 			if r.collidelist(block_list) == -1:
+# 				block_list.append(r)
+# 				return
+# 		else:
+# 			block_list.append(r)
 
 # while len(block_list) != 10:
 # 	createEnemyBlock()
 
+enemy = Enemy(Colors["blue"])
+enemy_list.append(enemy)
+
 # Function that rotates the surface depending on the position of the mouse
-def rotate(surface,mouse_pos):
+def rotate(surface,mouse_pos,surface_pos):
 	correction_angle = 90
 
 	mouse_x,mouse_y = mouse_pos
@@ -168,6 +223,20 @@ def enemyHit(bullet,block):
 
 		if distance <= bullet.radius:
 			return True
+
+	return False
+
+# Function that checks if the bullets from the player and enemies collide with each other
+def bulletsHit(bullet,enemy_bullet):
+
+	# Using the distance formula to calculate the relative distance between the centers of the two bullets
+	dx = bullet.x - enemy_bullet.x
+	dy = bullet.y - enemy_bullet.y
+
+	distance = math.sqrt((dx * dx) + (dy * dy))
+
+	if distance <= bullet.radius + enemy_bullet.radius:
+		return True
 
 	return False
 
@@ -330,16 +399,41 @@ while not exit_game:
 			bullet = Bullet(Colors["green"],new_surface_rect.center,7,mouse_pos,7)
 			bullet_list.append(bullet)
 
-	new_surface,new_surface_rect = rotate(player_surface,mouse_pos)
+	current_bullet_timer = pygame.time.get_ticks()
+	for enemy in enemy_list:
+		if current_bullet_timer - enemy.start_bullet_timer >= enemy.bullet_frequency:
+			enemy.start_bullet_timer = current_bullet_timer
+			enemy_bullet = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,surface_pos,2)
+			enemy.bullet_list.append(enemy_bullet)
+
+	new_surface,new_surface_rect = rotate(player_surface,mouse_pos,surface_pos)
+
+	for enemy in enemy_list:
+		enemy.new_surface,enemy.new_surface_rect = rotate(enemy.surface,surface_pos,enemy.position)
 
 	# Check if the bullet is colliding with the enemy
 	for bullet in bullet_list:
-		for block in block_list:
-			if enemyHit(bullet,block):
+		for enemy in enemy_list:
+			if enemyHit(bullet,enemy.new_surface_rect):
 				if bullet in bullet_list:
 					bullet_list.remove(bullet)
 
-				block_list.remove(block)
+				# If there are bullets fired by the enemy on the screen, they should not be destroyed even if the enemy is destroyed
+				if len(enemy.bullet_list) != 0:
+					bullet_list.extend(enemy.bullet_list)
+
+				enemy_list.remove(enemy)
+
+	# Check if the bullets are colliding with each other
+	for bullet in bullet_list:
+		for enemy in enemy_list:
+			for enemy_bullet in enemy.bullet_list:
+				if bulletsHit(bullet,enemy_bullet):
+					# Destroying both bullets if they collide with each other
+					if bullet in bullet_list:
+						bullet_list.remove(bullet)
+
+					enemy.bullet_list.remove(enemy_bullet)
 
 	# If there are less than 10 enemies on the screen, create a new enemy
 	# if len(block_list) == 0:
@@ -349,21 +443,38 @@ while not exit_game:
 	# --Drawing all the components on the screen
 	window.fill(Colors["black"])
 
+	# Drawing the enemy
+	for enemy in enemy_list:
+		window.blit(enemy.new_surface,enemy.new_surface_rect.topleft)
+		pygame.draw.polygon(enemy.surface,enemy.color,enemy.points)
+
+	# Drawing the player and their bullets
 	window.blit(new_surface,new_surface_rect.topleft)
 
 	# The points of the triangle wrt the player surface
 	points = ((surface_width / 2,0),(0,surface_height),(surface_width,surface_height))
 	pygame.draw.polygon(player_surface,Colors["red"],points)
 
+	# Drawing the player's bullet
 	for bullet in bullet_list:
 		pygame.draw.circle(window,bullet.color,(bullet.x,bullet.y),bullet.radius)
 
-	for block in block_list:
-		pygame.draw.rect(window,Colors["blue"],block)
+	# Drawing the enemy's bullet
+	for enemy in enemy_list:
+		for enemy_bullet in enemy.bullet_list:
+			pygame.draw.circle(window,enemy_bullet.color,(enemy_bullet.x,enemy_bullet.y),enemy_bullet.radius)
 
 	# Updating the screen with whatever has been drawn so
 	for bullet in bullet_list:
 		bullet.update()
+
+	for enemy in enemy_list:
+		for enemy_bullet in enemy.bullet_list:
+			enemy_bullet.update()
+
+	# Updating the enemies
+	for enemy in enemy_list:
+		enemy.update()
 
 	pygame.display.update()
 
