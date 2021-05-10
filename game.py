@@ -56,6 +56,7 @@ class Enemy:
 		if self.type == 1:
 			self.points = ((surface_width / 2,0),(0,surface_height),(surface_width,surface_height))
 			self.velocity = 0.5
+			self.hit_box = pygame.Rect(5,0,20,30)
 
 	# Function that randomizes the position of the enemy on the main display
 	def randomize_position(self):
@@ -99,6 +100,7 @@ class Enemy:
 				self.y = window_height - (surface_height / 2)
 
 			self.position = (self.x,self.y)
+			self.hit_box = pygame.Rect(self.x - 10,self.y - 15,20,30)
 
 # Initialize the game engine
 pygame.init()
@@ -123,10 +125,16 @@ window_center = window.get_rect().center
 clock = pygame.time.Clock()
 
 # --Global Variables--
+# Empty Lists
 bullet_list = []
 enemy_list = []
 dead_list = []
 
+# Empty Dictionaries
+controller_button_map = {}
+analog_axes = {}
+
+# Booleans
 shooting = False
 go_up = False
 go_down = False
@@ -135,10 +143,11 @@ go_right = False
 exit_game = False
 mouse_read = True
 use_ps4_controller = False
-controller_button_map = {}
-analog_axes = {}
+
+# Miscellaneous
 player_velocity = 3
 surface_pos = window_center
+player_hitbox = pygame.Rect(5,0,20,30)
 start = pygame.time.get_ticks()
 
 # Tuples that indicate the direction in which the player moves
@@ -415,7 +424,7 @@ while not exit_game:
 	# Check if the bullet is colliding with the enemy
 	for bullet in bullet_list:
 		for enemy in enemy_list:
-			if enemyHit(bullet,enemy.new_surface_rect):
+			if enemyHit(bullet,enemy.hit_box):
 				if bullet in bullet_list:
 					bullet_list.remove(bullet)
 
@@ -444,6 +453,18 @@ while not exit_game:
 
 				dead_list.remove(dead_bullet)
 
+	# Check if the player takes damage from enemy bullets
+	for enemy in enemy_list:
+		for enemy_bullet in enemy.bullet_list:
+			if enemyHit(enemy_bullet,player_hitbox):
+				exit_game = True
+				enemy.bullet_list.remove(enemy_bullet)
+
+	for dead_bullet in dead_list:
+		if enemyHit(dead_bullet,player_hitbox):
+			exit_game = True
+			dead_list.remove(dead_bullet)
+
 	# Checking if the bullets are going out-of-bounds
 	for bullet in bullet_list:
 		if bullet.x <= 0 or bullet.x >= window_width or bullet.y <= 0 or bullet.y >= window_height:
@@ -468,11 +489,14 @@ while not exit_game:
 	# Drawing the enemy
 	for enemy in enemy_list:
 		window.blit(enemy.new_surface,enemy.new_surface_rect.topleft)
+		pygame.draw.rect(enemy.surface,Colors["black"],enemy.hit_box,1)
 		pygame.draw.polygon(enemy.surface,enemy.color,enemy.points)
 
 	# Drawing the player and their bullets
 	window.blit(new_surface,new_surface_rect.topleft)
 
+	# Drawing the player's hitbox
+	pygame.draw.rect(player_surface,Colors["black"],player_hitbox,1)
 	# The points of the triangle wrt the player surface
 	points = ((surface_width / 2,0),(0,surface_height),(surface_width,surface_height))
 	pygame.draw.polygon(player_surface,Colors["red"],points)
@@ -492,6 +516,9 @@ while not exit_game:
 	# Updating the screen with whatever has been drawn so
 	for bullet in bullet_list:
 		bullet.update()
+
+	# Updating the hitbox of the player
+	player_hitbox = pygame.Rect(surface_pos[0] - 10,surface_pos[1] - 15,20,30)
 
 	for enemy in enemy_list:
 		for enemy_bullet in enemy.bullet_list:
