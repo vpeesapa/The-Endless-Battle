@@ -14,7 +14,7 @@ Varun Peesapati
 
 ## Alert: There are things that are yet to be implemented
 * ~~Implement one type of enemy - one that's about the same size as the player but shoots and relentlessly follows the player (Still need to implement logic for when the player gets hit by an enemy bullet).~~
-* Consider logic when either the player collides with the enemy or two enemies collide with each other while following the player (Possibly through the **A&ask; algorithm**).
+* Consider logic when either the player collides with the enemy or two enemies collide with each other while following the player (Possibly through the **A&ast; algorithm**).
 * Implement a second type of enemy - one that's circular in shape and radially shoots its bullets, while also rotating on its axis.
 * ~~Introducing a health system for the player that is indicated by shifting the colors (for eg. green &#8594; yellow &#8594; red).~~
 * Change button mappings for XBox controllers.
