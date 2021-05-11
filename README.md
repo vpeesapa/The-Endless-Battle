@@ -11,6 +11,8 @@ Varun Peesapati
 * Player can aim in any direction and fire bullets based on where they are pointing towards.
 * Player can be controlled using a controller (**Note**: Tested using only a **PS4 controller**).
 * Bullets' collision with makeshift blocks can be detected, resulting in both being removed.
+* Improvised health system for both player and enemy, which also includes damage values for their respective bullets.
+* Newer enemies do not spawn immediately, but rather after a second.
 
 ## Alert: There are things that are yet to be implemented
 * ~~Implement one type of enemy - one that's about the same size as the player but shoots and relentlessly follows the player (Still need to implement logic for when the player gets hit by an enemy bullet).~~
