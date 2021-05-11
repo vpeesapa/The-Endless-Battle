@@ -479,7 +479,7 @@ while not exit_game:
 			else:
 				exit_game = True
 
-			enemy.bullet_list.remove(enemy_bullet)
+			dead_list.remove(dead_bullet)
 
 	# Checking if the bullets are going out-of-bounds
 	for bullet in bullet_list:
