@@ -10,10 +10,11 @@ from controllers import ps4_controller,ps4_analog
 class Bullet:
 
 	# Parametrised constructor that initializes the bullet
-	def __init__(self,color,point,radius,mouse_pos,velocity):
+	def __init__(self,color,point,radius,mouse_pos,velocity,damage):
 		self.color = color
 		self.x,self.y = point
 		self.radius = radius
+		self.damage = damage
 
 		mouse_x,mouse_y = mouse_pos
 
@@ -45,6 +46,7 @@ class Enemy:
 		# Type == 1 means the enemy will be relentlessly following the player while also shooting at them
 		# Type == 2 means the enemy will be shooting radially in four directions while rotating about a fixed point
 		self.type = 1
+		self.health = 100
 
 		self.bullet_list = []
 		self.start_bullet_timer = pygame.time.get_ticks()
@@ -148,6 +150,8 @@ use_ps4_controller = False
 player_velocity = 3
 surface_pos = window_center
 player_hitbox = pygame.Rect(5,0,20,30)
+player_health = 100
+start_enemy_spawner = pygame.time.get_ticks()
 start = pygame.time.get_ticks()
 hits_taken = 0
 player_color = Colors["green"]
@@ -191,8 +195,8 @@ if use_ps4_controller:
 # while len(block_list) != 10:
 # 	createEnemyBlock()
 
-enemy = Enemy(Colors["blue"])
-enemy_list.append(enemy)
+# enemy = Enemy(Colors["blue"])
+# enemy_list.append(enemy)
 
 # Function that rotates the surface depending on the position of the mouse
 def rotate(surface,mouse_pos,surface_pos):
@@ -408,14 +412,14 @@ while not exit_game:
 		if now - start >= 200:
 			# Spawns a new bullet every 0.2 seconds
 			start = now
-			bullet = Bullet(Colors["lightblue"],new_surface_rect.center,7,mouse_pos,7)
+			bullet = Bullet(Colors["silver"],new_surface_rect.center,7,mouse_pos,7,50)
 			bullet_list.append(bullet)
 
 	current_bullet_timer = pygame.time.get_ticks()
 	for enemy in enemy_list:
 		if current_bullet_timer - enemy.start_bullet_timer >= enemy.bullet_frequency:
 			enemy.start_bullet_timer = current_bullet_timer
-			enemy_bullet = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,surface_pos,2)
+			enemy_bullet = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,surface_pos,2,20)
 			enemy.bullet_list.append(enemy_bullet)
 
 	new_surface,new_surface_rect = rotate(player_surface,mouse_pos,surface_pos)
@@ -427,14 +431,21 @@ while not exit_game:
 	for bullet in bullet_list:
 		for enemy in enemy_list:
 			if enemyHit(bullet,enemy.hitbox):
+				enemy.health -= bullet.damage
+
 				if bullet in bullet_list:
 					bullet_list.remove(bullet)
 
-				# If there are bullets fired by the enemy on the screen, they should not be destroyed even if the enemy is destroyed
-				if len(enemy.bullet_list) != 0:
-					dead_list.extend(enemy.bullet_list)
+				if 0 < enemy.health < 100:
+					enemy.color = Colors["skyblue"]
+				elif enemy.health <= 0:
+					# If there are bullets fired by the enemy on the screen, they should not be destroyed even if the enemy is destroyed
+					if len(enemy.bullet_list) != 0:
+						dead_list.extend(enemy.bullet_list)
 
-				enemy_list.remove(enemy)
+					enemy_list.remove(enemy)
+					# Start timer to spawn new enemy after existing enemy is destroyed
+					start_enemy_spawner = pygame.time.get_ticks()
 
 	# Check if the bullets are colliding with each other
 	for bullet in bullet_list:
@@ -459,10 +470,15 @@ while not exit_game:
 	for enemy in enemy_list:
 		for enemy_bullet in enemy.bullet_list:
 			if enemyHit(enemy_bullet,player_hitbox):
-				hits_taken += 1
-				if hits_taken == 1:
+				player_health -= enemy_bullet.damage
+
+				if 60 < player_health <= 80:
+					player_color = Colors["yellowgreen"]
+				elif 40 < player_health <= 60:
 					player_color = Colors["yellow"]
-				elif hits_taken == 2:
+				elif 20 < player_health <= 40:
+					player_color = Colors["orange"]
+				elif 0 < player_health <= 20:
 					player_color = Colors["red"]
 				else:
 					exit_game = True
@@ -471,10 +487,15 @@ while not exit_game:
 
 	for dead_bullet in dead_list:
 		if enemyHit(dead_bullet,player_hitbox):
-			hits_taken += 1
-			if hits_taken == 1:
+			player_health -= dead_bullet.damage
+
+			if 60 < player_health <= 80:
+				player_color = Colors["yellowgreen"]
+			elif 40 < player_health <= 60:
 				player_color = Colors["yellow"]
-			elif hits_taken == 2:
+			elif 20 < player_health <= 40:
+				player_color = Colors["orange"]
+			elif 0 < player_health <= 20:
 				player_color = Colors["red"]
 			else:
 				exit_game = True
@@ -496,8 +517,12 @@ while not exit_game:
 				enemy.bullet_list.remove(enemy_bullet)
 
 	# If there are less than 10 enemies on the screen, create a new enemy
+	current_enemy_spawner = pygame.time.get_ticks()
 	if len(enemy_list) == 0:
-		enemy_list.append(Enemy(Colors["blue"]))
+		if current_enemy_spawner - start_enemy_spawner >= 1000:
+			# Spawn an enemy only after 1 second
+			start_enemy_spawner = current_enemy_spawner
+			enemy_list.append(Enemy(Colors["blue"]))
 
 	# --Drawing all the components on the screen
 	window.fill(Colors["black"])
