@@ -530,14 +530,11 @@ while not exit_game:
 	# Drawing the enemy
 	for enemy in enemy_list:
 		window.blit(enemy.new_surface,enemy.new_surface_rect.topleft)
-		pygame.draw.rect(enemy.surface,Colors["black"],enemy.hitbox,1)
 		pygame.draw.polygon(enemy.surface,enemy.color,enemy.points)
 
 	# Drawing the player and their bullets
 	window.blit(new_surface,new_surface_rect.topleft)
 
-	# Drawing the player's hitbox
-	pygame.draw.rect(player_surface,Colors["black"],player_hitbox,1)
 	# The points of the triangle wrt the player surface
 	points = ((surface_width / 2,0),(0,surface_height),(surface_width,surface_height))
 	pygame.draw.polygon(player_surface,player_color,points)
