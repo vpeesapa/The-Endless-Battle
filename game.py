@@ -463,7 +463,7 @@ while not exit_game:
 					bullet_list.remove(bullet)
 
 				if 0 < enemy.health < 100:
-					enemy.color = Colors["skyblue"]
+					enemy.color = Colors["cyan"]
 				elif enemy.health <= 0:
 					# If there are bullets fired by the enemy on the screen, they should not be destroyed even if the enemy is destroyed
 					if len(enemy.bullet_list) != 0:
