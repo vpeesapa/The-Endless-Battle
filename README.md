@@ -16,8 +16,11 @@ Varun Peesapati
 
 ## Alert: There are things that are yet to be implemented
 * ~~Implement one type of enemy - one that's about the same size as the player but shoots and relentlessly follows the player (Still need to implement logic for when the player gets hit by an enemy bullet).~~
+* Clean up code by separating logic for both types of enemies into two different classes that inherits from the base class `Enemy`.
+* Increase difficulty by introducing a different type of bullet which cannot be destroyed by the player's bullets and requires the player to dodge carefully and indicated by a different color (**Only shot by the second type of enemies**).
 * Consider logic when either the player collides with the enemy or two enemies collide with each other while following the player (Possibly through the **A&ast; algorithm**).
-* Implement a second type of enemy - one that's circular in shape and radially shoots its bullets, while also rotating on its axis.
+* ~~Implement a second type of enemy - one that's circular in shape and radially shoots its bullets, while also rotating on its axis.~~
 * ~~Introducing a health system for the player that is indicated by shifting the colors (for eg. green &#8594; yellow &#8594; red).~~
+* Have a UI (eg. a start menu, pause menu, etc.).
 * Change button mappings for XBox controllers.
 * Update README with details of the completed project.
