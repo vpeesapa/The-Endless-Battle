@@ -45,7 +45,7 @@ class Enemy:
 
 		# Type == 1 means the enemy will be relentlessly following the player while also shooting at them
 		# Type == 2 means the enemy will be shooting radially in four directions while rotating about a fixed point
-		self.type = 1
+		self.type = random.choice([1,2])
 		self.health = 100
 
 		self.bullet_list = []
@@ -59,6 +59,13 @@ class Enemy:
 			self.points = ((surface_width / 2,0),(0,surface_height),(surface_width,surface_height))
 			self.velocity = 0.5
 			self.hitbox = pygame.Rect(5,0,20,30)
+			self.angle = 0
+		elif self.type == 2:
+			self.points = (surface_width / 2,surface_height / 2)
+			self.velocity = 0
+			self.hitbox = pygame.Rect(self.position[0] - 15,self.position[1] - 15,30,30)
+			self.new_surface_rect = self.surface.get_rect(center = self.position)
+			self.angle = 0
 
 	# Function that randomizes the position of the enemy on the main display
 	def randomize_position(self):
@@ -103,6 +110,10 @@ class Enemy:
 
 			self.position = (self.x,self.y)
 			self.hitbox = pygame.Rect(self.x - 10,self.y - 15,20,30)
+		elif self.type == 2:
+			self.angle = (self.angle + 1) % 360
+			self.new_surface = pygame.transform.rotate(self.surface,self.angle)
+			self.new_surface_rect = self.new_surface.get_rect(center = self.position)
 
 # Initialize the game engine
 pygame.init()
@@ -419,13 +430,28 @@ while not exit_game:
 	for enemy in enemy_list:
 		if current_bullet_timer - enemy.start_bullet_timer >= enemy.bullet_frequency:
 			enemy.start_bullet_timer = current_bullet_timer
-			enemy_bullet = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,surface_pos,2,20)
-			enemy.bullet_list.append(enemy_bullet)
+			if enemy.type == 1:
+				enemy_bullet = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,surface_pos,2,20)
+				enemy.bullet_list.append(enemy_bullet)
+			elif enemy.type == 2:
+				bullet_dest_1 = ((math.cos(math.radians(enemy.angle)) * 15 + enemy.x),(math.sin(math.radians(enemy.angle)) * 15 + enemy.y))
+				enemy_bullet_1 = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,bullet_dest_1,2,20)
+				enemy.bullet_list.append(enemy_bullet_1)
+				bullet_dest_2 = (((-1) * math.cos(math.radians(enemy.angle)) * 15 + enemy.x),((-1) * math.sin(math.radians(enemy.angle)) * 15 + enemy.y))
+				enemy_bullet_2 = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,bullet_dest_2,2,20)
+				enemy.bullet_list.append(enemy_bullet_2)
+				bullet_dest_3 = ((math.cos(math.radians(enemy.angle - 90)) * 15 + enemy.x),(math.sin(math.radians(enemy.angle - 90)) * 15 + enemy.y))
+				enemy_bullet_3 = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,bullet_dest_3,2,20)
+				enemy.bullet_list.append(enemy_bullet_3)
+				bullet_dest_4 = (((-1) * math.cos(math.radians(enemy.angle - 90)) * 15 + enemy.x),((-1) * math.sin(math.radians(enemy.angle - 90)) * 15 + enemy.y))
+				enemy_bullet_4 = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,bullet_dest_4,2,20)
+				enemy.bullet_list.append(enemy_bullet_4)
 
 	new_surface,new_surface_rect = rotate(player_surface,mouse_pos,surface_pos)
 
 	for enemy in enemy_list:
-		enemy.new_surface,enemy.new_surface_rect = rotate(enemy.surface,surface_pos,enemy.position)
+		if enemy.type == 1:
+			enemy.new_surface,enemy.new_surface_rect = rotate(enemy.surface,surface_pos,enemy.position)
 
 	# Check if the bullet is colliding with the enemy
 	for bullet in bullet_list:
@@ -530,7 +556,10 @@ while not exit_game:
 	# Drawing the enemy
 	for enemy in enemy_list:
 		window.blit(enemy.new_surface,enemy.new_surface_rect.topleft)
-		pygame.draw.polygon(enemy.surface,enemy.color,enemy.points)
+		if enemy.type == 1:
+			pygame.draw.polygon(enemy.surface,enemy.color,enemy.points)
+		elif enemy.type == 2:
+			pygame.draw.circle(enemy.surface,enemy.color,enemy.points,15)
 
 	# Drawing the player and their bullets
 	window.blit(new_surface,new_surface_rect.topleft)
