@@ -431,20 +431,21 @@ while not exit_game:
 		if current_bullet_timer - enemy.start_bullet_timer >= enemy.bullet_frequency:
 			enemy.start_bullet_timer = current_bullet_timer
 			if enemy.type == 1:
-				enemy_bullet = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,surface_pos,2,20)
+				enemy_bullet = Bullet(Colors["silver"],enemy.new_surface_rect.center,5,surface_pos,2,20)
 				enemy.bullet_list.append(enemy_bullet)
 			elif enemy.type == 2:
+				bullet_color = random.choice([Colors["silver"],Colors["magenta"]])
 				bullet_dest_1 = ((math.cos(math.radians(enemy.angle)) * 15 + enemy.x),(math.sin(math.radians(enemy.angle)) * 15 + enemy.y))
-				enemy_bullet_1 = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,bullet_dest_1,2,20)
+				enemy_bullet_1 = Bullet(bullet_color,enemy.new_surface_rect.center,5,bullet_dest_1,2,20)
 				enemy.bullet_list.append(enemy_bullet_1)
 				bullet_dest_2 = (((-1) * math.cos(math.radians(enemy.angle)) * 15 + enemy.x),((-1) * math.sin(math.radians(enemy.angle)) * 15 + enemy.y))
-				enemy_bullet_2 = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,bullet_dest_2,2,20)
+				enemy_bullet_2 = Bullet(bullet_color,enemy.new_surface_rect.center,5,bullet_dest_2,2,20)
 				enemy.bullet_list.append(enemy_bullet_2)
 				bullet_dest_3 = ((math.cos(math.radians(enemy.angle - 90)) * 15 + enemy.x),(math.sin(math.radians(enemy.angle - 90)) * 15 + enemy.y))
-				enemy_bullet_3 = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,bullet_dest_3,2,20)
+				enemy_bullet_3 = Bullet(bullet_color,enemy.new_surface_rect.center,5,bullet_dest_3,2,20)
 				enemy.bullet_list.append(enemy_bullet_3)
 				bullet_dest_4 = (((-1) * math.cos(math.radians(enemy.angle - 90)) * 15 + enemy.x),((-1) * math.sin(math.radians(enemy.angle - 90)) * 15 + enemy.y))
-				enemy_bullet_4 = Bullet(Colors["magenta"],enemy.new_surface_rect.center,5,bullet_dest_4,2,20)
+				enemy_bullet_4 = Bullet(bullet_color,enemy.new_surface_rect.center,5,bullet_dest_4,2,20)
 				enemy.bullet_list.append(enemy_bullet_4)
 
 	new_surface,new_surface_rect = rotate(player_surface,mouse_pos,surface_pos)
@@ -477,7 +478,7 @@ while not exit_game:
 	for bullet in bullet_list:
 		for enemy in enemy_list:
 			for enemy_bullet in enemy.bullet_list:
-				if bulletsHit(bullet,enemy_bullet):
+				if bulletsHit(bullet,enemy_bullet) and enemy_bullet.color == Colors["silver"]:
 					# Destroying both bullets if they collide with each other
 					if bullet in bullet_list:
 						bullet_list.remove(bullet)
@@ -486,7 +487,7 @@ while not exit_game:
 
 	for bullet in bullet_list:
 		for dead_bullet in dead_list:
-			if bulletsHit(bullet,dead_bullet):
+			if bulletsHit(bullet,dead_bullet) and dead_bullet.color == Colors["silver"]:
 				if bullet in bullet_list:
 					bullet_list.remove(bullet)
 
