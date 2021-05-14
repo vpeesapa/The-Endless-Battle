@@ -47,8 +47,6 @@ class Enemy:
 
 		self.bullet_list = []
 		self.start_bullet_timer = pygame.time.get_ticks()
-		# Enemy fires a bullet at the player every 0.3 seconds
-		self.bullet_frequency = 300
 
 		self.randomize_position()
 
@@ -79,6 +77,8 @@ class EnemyType1(Enemy):
 		self.points = ((surface_width / 2,0),(0,surface_height),(surface_width,surface_height))
 		self.velocity = 0.5
 		self.hitbox = pygame.Rect(5,0,20,30)
+		# Bullets are fired at an interval of 0.3s
+		self.bullet_frequency = 300
 
 	# Function that updates the enemy's position
 	def update(self):
@@ -132,6 +132,8 @@ class EnemyType2(Enemy):
 		self.radius = 15
 		self.new_surface_rect = self.surface.get_rect(center = self.position)
 		self.angle = 0
+		# Bullets are fired at an interval of 0.3s
+		self.bullet_frequency = 300
 
 	# Function that updates the enemy's rotation angle
 	def update(self):
@@ -154,6 +156,42 @@ class EnemyType2(Enemy):
 		bullet_dest_4 = (((-1) * math.cos(math.radians(self.angle - 90)) * 15 + self.x),((-1) * math.sin(math.radians(self.angle - 90)) * 15 + self.y))
 		enemy_bullet_4 = Bullet(bullet_color,self.new_surface_rect.center,5,bullet_dest_4,2,20)
 		self.bullet_list.append(enemy_bullet_4)
+
+	# Function that draws the enemy onto the screen
+	def drawEnemy(self):
+		window.blit(self.new_surface,self.new_surface_rect.topleft)
+		pygame.draw.circle(self.surface,self.color,self.points,self.radius)
+
+# Class that defines the functionalities of the third type of enemy
+class EnemyType3(Enemy):
+
+	# Parametrised constructor that initializes the third type of enemy
+	def __init__(self,color):
+		# Calls the constructor of the parent class
+		super().__init__(color)
+
+		self.type = 3
+		self.points = (surface_width / 2,surface_height / 2)
+		self.hitbox = pygame.Rect(self.position[0] - 15,self.position[1] - 15,30,30)
+		self.new_surface_rect = self.surface.get_rect(center = self.position)
+		self.radius = 15
+		# Bullets are fired at an interval of 0.5s
+		self.bullet_frequency = 500
+
+	# Function that updates the enemy (in this case does nothing)
+	def update(self):
+		return
+
+	# Function which makes the enemy fire bullets
+	def fireBullet(self):
+		bullet_color = Colors["silver"]
+		angles = [0,30,60,90,120,150,180,210,240,270,300,330]
+
+		# Create bullets at every angle
+		for angle in angles:
+			bullet_dest = ((math.cos(math.radians(angle)) * 15 + self.x),(math.sin(math.radians(angle)) * 15 + self.y))
+			enemy_bullet = Bullet(bullet_color,self.new_surface_rect.center,5,bullet_dest,2,20)
+			self.bullet_list.append(enemy_bullet)
 
 	# Function that draws the enemy onto the screen
 	def drawEnemy(self):
@@ -578,11 +616,13 @@ while not exit_game:
 		if current_enemy_spawner - start_enemy_spawner >= 1000:
 			# Spawn an enemy only after 1 second
 			start_enemy_spawner = current_enemy_spawner
-			enemy_type = random.choice([1,2])
+			enemy_type = random.choice([1,2,3])
 			if enemy_type == 1:
 				enemy_list.append(EnemyType1(Colors["blue"]))
 			elif enemy_type == 2:
 				enemy_list.append(EnemyType2(Colors["blue"]))
+			elif enemy_type == 3:
+				enemy_list.append(EnemyType3(Colors["blue"]))
 
 	# --Drawing all the components on the screen--
 	window.fill(Colors["black"])
