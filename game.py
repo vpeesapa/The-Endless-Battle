@@ -54,7 +54,7 @@ class Enemy:
 	def randomize_position(self):
 		while True:
 			self.x = random.randint(surface_width,window_width - surface_width)
-			self.y = random.randint(surface_height,window_height - surface_height)
+			self.y = random.randint(25 + surface_height,window_height - surface_height)
 
 			player_radius = surface_width / math.sqrt(2)
 
@@ -100,8 +100,8 @@ class EnemyType1(Enemy):
 		elif self.x + (surface_width / 2) >= window_width:
 			self.x = window_width - (surface_width / 2)
 
-		if self.y - (surface_height / 2) <= 0:
-			self.y = surface_height / 2
+		if self.y - (surface_height / 2) <= 25:
+			self.y = 25 + (surface_height / 2)
 		elif self.y + (surface_height / 2) >= window_height:
 			self.y = window_height - (surface_height / 2)
 
@@ -253,6 +253,8 @@ player_color = Colors["green"]
 # Player doesn't take damage for 5s after being damaged
 player_recovery_time = 5000
 start_player_recovery = pygame.time.get_ticks()
+player_score = 0
+font = pygame.font.Font(None,30)
 
 # Tuples that indicate the direction in which the player moves
 up = (0,-1)
@@ -370,8 +372,8 @@ def movePlayer(direction):
 
 	if new_y + (surface_height / 2) >= window_height:
 		new_y = window_height - (surface_height / 2)
-	elif new_y - (surface_height / 2) <= 0:
-		new_y = surface_height / 2
+	elif new_y - (surface_height / 2) <= 25:
+		new_y = 25 + (surface_height / 2)
 
 	return new_x,new_y
 
@@ -553,6 +555,7 @@ while not exit_game:
 				if 0 < enemy.health < 100:
 					enemy.color = Colors["cyan"]
 				elif enemy.health <= 0:
+					player_score += 1
 					# If there are bullets fired by the enemy on the screen, they should not be destroyed even if the enemy is destroyed
 					if len(enemy.bullet_list) != 0:
 						dead_list.extend(enemy.bullet_list)
@@ -632,16 +635,16 @@ while not exit_game:
 
 	# Checking if the bullets are going out-of-bounds
 	for bullet in bullet_list:
-		if bullet.x <= 0 or bullet.x >= window_width or bullet.y <= 0 or bullet.y >= window_height:
+		if bullet.x <= 0 or bullet.x >= window_width or bullet.y <= 25 or bullet.y >= window_height:
 			bullet_list.remove(bullet)
 
 	for dead_bullet in dead_list:
-		if dead_bullet.x <= 0 or dead_bullet.x >= window_width or dead_bullet.y <= 0 or dead_bullet.y >= window_height:
+		if dead_bullet.x <= 0 or dead_bullet.x >= window_width or dead_bullet.y <= 25 or dead_bullet.y >= window_height:
 			dead_list.remove(dead_bullet)
 
 	for enemy in enemy_list:
 		for enemy_bullet in enemy.bullet_list:
-			if enemy_bullet.x <= 0 or enemy_bullet.x >= window_width or enemy_bullet.y <= 0 or enemy_bullet.y >= window_height:
+			if enemy_bullet.x <= 0 or enemy_bullet.x >= window_width or enemy_bullet.y <= 25 or enemy_bullet.y >= window_height:
 				enemy.bullet_list.remove(enemy_bullet)
 
 	# If there are less than 10 enemies on the screen, create a new enemy
@@ -681,7 +684,17 @@ while not exit_game:
 	for dead_bullet in dead_list:
 		pygame.draw.circle(window,dead_bullet.color,(dead_bullet.x,dead_bullet.y),dead_bullet.radius)
 
-	# Updating the screen with whatever has been drawn so
+	# Displaying the player's score and health at the top of the screen
+	text = font.render("Score: " + str(player_score),1,Colors["white"])
+	window.blit(text,(0,0))
+
+	text = font.render("Health: " + str(player_health) + "%",1,player_color)
+	window.blit(text,((window_width / 2) - 60,0))
+
+	# Drawing a line that differentiates between the game and the HUD
+	pygame.draw.line(window,Colors["white"],(0,25),(window_width,25))
+
+	# --Updating the screen with whatever has been drawn so far--
 	for bullet in bullet_list:
 		bullet.update()
 
