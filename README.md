@@ -23,7 +23,7 @@ Varun Peesapati
 * ~~Increase difficulty by introducing a different type of bullet which cannot be destroyed by the player's bullets and requires them to dodge carefully and indicated by a different color (**Only shot by the second type of enemies**).~~
 * ~~Implement a third type of enemy that stays in its position (**but does not rotate**), and shoots more bullets radially.~~
 * ~~Give some time for the player to recover before it can take more damage.~~
-* Display score and player's health at the top of the screen
+* ~~Display score and player's health at the top of the screen.~~
 * Consider logic when either the player collides with the enemy or two enemies collide with each other while following the player (Possibly through the **A&ast; algorithm**).
 * Have a UI (eg. a start menu, pause menu, etc.).
 * Change button mappings for XBox controllers.
