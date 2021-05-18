@@ -255,6 +255,8 @@ player_recovery_time = 5000
 start_player_recovery = pygame.time.get_ticks()
 player_score = 0
 font = pygame.font.Font(None,30)
+# After taking damage, the player will keep blinking for 5s
+start_blinker_timer = pygame.time.get_ticks()
 
 # Tuples that indicate the direction in which the player moves
 up = (0,-1)
@@ -379,6 +381,10 @@ def movePlayer(direction):
 
 # Function that draws the player
 def drawPlayer(player_surface,new_surface,new_surface_rect,recovery_diff):
+	global start_blinker_timer
+
+	current_blinker_timer = pygame.time.get_ticks()
+
 	window.blit(new_surface,new_surface_rect.topleft)
 
 	# The points of the triangle wrt the player surface
@@ -386,10 +392,11 @@ def drawPlayer(player_surface,new_surface,new_surface_rect,recovery_diff):
 
 	if recovery_diff < player_recovery_time and not first_hit:
 		# If the player takes damage, they recover for 5s, indicated by the constant back and forth flickering
-		if recovery_diff % 2 == 0:
+		if current_blinker_timer - start_blinker_timer < 100:
 			pygame.draw.polygon(player_surface,Colors["black"],points)
 		else:
 			pygame.draw.polygon(player_surface,player_color,points)
+			start_blinker_timer = current_blinker_timer
 	else:
 		pygame.draw.polygon(player_surface,player_color,points)
 
