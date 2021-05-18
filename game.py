@@ -238,6 +238,7 @@ go_left = False
 go_right = False
 exit_game = False
 mouse_read = True
+first_hit = True
 use_ps4_controller = False
 
 # Miscellaneous
@@ -249,6 +250,9 @@ start_enemy_spawner = pygame.time.get_ticks()
 start = pygame.time.get_ticks()
 hits_taken = 0
 player_color = Colors["green"]
+# Player doesn't take damage for 5s after being damaged
+player_recovery_time = 5000
+start_player_recovery = pygame.time.get_ticks()
 
 # Tuples that indicate the direction in which the player moves
 up = (0,-1)
@@ -370,6 +374,22 @@ def movePlayer(direction):
 		new_y = surface_height / 2
 
 	return new_x,new_y
+
+# Function that draws the player
+def drawPlayer(player_surface,new_surface,new_surface_rect,recovery_diff):
+	window.blit(new_surface,new_surface_rect.topleft)
+
+	# The points of the triangle wrt the player surface
+	points = ((surface_width / 2,0),(0,surface_height),(surface_width,surface_height))
+
+	if recovery_diff < player_recovery_time and not first_hit:
+		# If the player takes damage, they recover for 5s, indicated by the constant back and forth flickering
+		if recovery_diff % 2 == 0:
+			pygame.draw.polygon(player_surface,Colors["black"],points)
+		else:
+			pygame.draw.polygon(player_surface,player_color,points)
+	else:
+		pygame.draw.polygon(player_surface,player_color,points)
 
 # Main gameplay loop
 while not exit_game:
@@ -561,10 +581,19 @@ while not exit_game:
 				dead_list.remove(dead_bullet)
 
 	# Check if the player takes damage from enemy bullets
+	current_recovery_time = pygame.time.get_ticks()
 	for enemy in enemy_list:
 		for enemy_bullet in enemy.bullet_list:
 			if enemyHit(enemy_bullet,player_hitbox):
-				player_health -= enemy_bullet.damage
+				if first_hit:
+					first_hit = False
+					start_player_recovery = current_recovery_time
+					player_health -= enemy_bullet.damage
+					enemy.bullet_list.remove(enemy_bullet)
+				elif current_recovery_time - start_player_recovery >= player_recovery_time:
+					start_player_recovery = current_recovery_time
+					player_health -= enemy_bullet.damage
+					enemy.bullet_list.remove(enemy_bullet)
 
 				if 60 < player_health <= 80:
 					player_color = Colors["yellowgreen"]
@@ -577,11 +606,18 @@ while not exit_game:
 				else:
 					exit_game = True
 
-				enemy.bullet_list.remove(enemy_bullet)
-
+	current_recovery_time = pygame.time.get_ticks()
 	for dead_bullet in dead_list:
 		if enemyHit(dead_bullet,player_hitbox):
-			player_health -= dead_bullet.damage
+			if first_hit:
+				first_hit = False
+				start_player_recovery = current_recovery_time
+				player_health -= dead_bullet.damage
+				dead_list.remove(dead_bullet)
+			elif current_recovery_time - start_player_recovery >= player_recovery_time:
+				start_player_recovery = current_recovery_time
+				player_health -= dead_bullet.damage
+				dead_list.remove(dead_bullet)
 
 			if 60 < player_health <= 80:
 				player_color = Colors["yellowgreen"]
@@ -593,8 +629,6 @@ while not exit_game:
 				player_color = Colors["red"]
 			else:
 				exit_game = True
-
-			dead_list.remove(dead_bullet)
 
 	# Checking if the bullets are going out-of-bounds
 	for bullet in bullet_list:
@@ -632,11 +666,8 @@ while not exit_game:
 		enemy.drawEnemy()
 
 	# Drawing the player and their bullets
-	window.blit(new_surface,new_surface_rect.topleft)
-
-	# The points of the triangle wrt the player surface
-	points = ((surface_width / 2,0),(0,surface_height),(surface_width,surface_height))
-	pygame.draw.polygon(player_surface,player_color,points)
+	recovery_diff = current_recovery_time - start_player_recovery
+	drawPlayer(player_surface,new_surface,new_surface_rect,recovery_diff)
 
 	# Drawing the player's bullet
 	for bullet in bullet_list:
