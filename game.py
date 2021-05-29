@@ -260,6 +260,7 @@ player_score = 0
 font = pygame.font.Font(None,30)
 # After taking damage, the player will keep blinking for 5s
 start_blinker_timer = pygame.time.get_ticks()
+num_enemies = 0
 
 # Tuples that indicate the direction in which the player moves
 up = (0,-1)
@@ -691,9 +692,12 @@ while not exit_game:
 		else:
 			enemy.keep_moving = True
 
+	if len(enemy_list) == 0:
+		num_enemies = random.choice([2,3,4])
+
 	# If there are less than 10 enemies on the screen, create a new enemy
 	current_enemy_spawner = pygame.time.get_ticks()
-	if len(enemy_list) == 0:
+	if len(enemy_list) < num_enemies:
 		if current_enemy_spawner - start_enemy_spawner >= 1000:
 			# Spawn an enemy only after 1 second
 			start_enemy_spawner = current_enemy_spawner
@@ -704,6 +708,8 @@ while not exit_game:
 				enemy_list.append(EnemyType2(Colors["blue"]))
 			elif enemy_type == 3:
 				enemy_list.append(EnemyType3(Colors["blue"]))
+
+			num_enemies -= 1
 
 	# --Drawing all the components on the screen--
 	window.fill(Colors["black"])
