@@ -48,6 +48,8 @@ class Enemy:
 		self.bullet_list = []
 		self.start_bullet_timer = pygame.time.get_ticks()
 
+		self.keep_moving = True
+
 		self.randomize_position()
 
 	# Function that randomizes the position of the enemy on the main display
@@ -82,31 +84,32 @@ class EnemyType1(Enemy):
 
 	# Function that updates the enemy's position
 	def update(self):
-		dx = surface_pos[0] - self.x
-		dy = surface_pos[1] - self.y
+		if self.keep_moving:
+			dx = surface_pos[0] - self.x
+			dy = surface_pos[1] - self.y
 
-		angle = math.atan2(dy,dx)
+			angle = math.atan2(dy,dx)
 
-		x_change = math.cos(angle) * self.velocity
-		y_change = math.sin(angle) * self.velocity
+			x_change = math.cos(angle) * self.velocity
+			y_change = math.sin(angle) * self.velocity
 
-		# Updating the position of the enemy accordingly
-		self.x += x_change
-		self.y += y_change
+			# Updating the position of the enemy accordingly
+			self.x += x_change
+			self.y += y_change
 
-		# Checking if the enemy is going out-of-bounds
-		if self.x - (surface_width / 2) <= 0:
-			self.x = surface_width / 2
-		elif self.x + (surface_width / 2) >= window_width:
-			self.x = window_width - (surface_width / 2)
+			# Checking if the enemy is going out-of-bounds
+			if self.x - (surface_width / 2) <= 0:
+				self.x = surface_width / 2
+			elif self.x + (surface_width / 2) >= window_width:
+				self.x = window_width - (surface_width / 2)
 
-		if self.y - (surface_height / 2) <= 25:
-			self.y = 25 + (surface_height / 2)
-		elif self.y + (surface_height / 2) >= window_height:
-			self.y = window_height - (surface_height / 2)
+			if self.y - (surface_height / 2) <= 25:
+				self.y = 25 + (surface_height / 2)
+			elif self.y + (surface_height / 2) >= window_height:
+				self.y = window_height - (surface_height / 2)
 
-		self.position = (self.x,self.y)
-		self.hitbox = pygame.Rect(self.x - 10,self.y - 15,20,30)
+			self.position = (self.x,self.y)
+			self.hitbox = pygame.Rect(self.x - 10,self.y - 15,20,30)
 
 	# Function which makes the enemy fire a bullet
 	def fireBullet(self):
@@ -400,6 +403,33 @@ def drawPlayer(player_surface,new_surface,new_surface_rect,recovery_diff):
 	else:
 		pygame.draw.polygon(player_surface,player_color,points)
 
+# Function that ensures that the player does not overlap with the enemy
+def enemiesCollide(enemy):
+	global surface_pos
+
+	enemy_x,enemy_y = enemy.position
+	player_x,player_y = surface_pos
+
+	player_diagonal = surface_width / math.sqrt(2)
+
+	enemy_width = enemy.new_surface_rect.width
+	enemy_height = enemy.new_surface_rect.height
+	enemy_diagonal = math.sqrt((enemy_width * enemy_width) + (enemy_height * enemy_height))
+
+	dx = player_x - enemy_x
+	dy = player_y - enemy_y
+
+	distance = math.sqrt((dx * dx) + (dy * dy))
+	angle = math.atan2(dy,dx)
+
+	if distance <= (player_diagonal / 2) + (enemy_diagonal / 2):
+		player_x = math.cos(angle) * ((player_diagonal / 2) + (enemy_diagonal / 2)) + enemy_x
+		player_y = math.sin(angle) * ((player_diagonal / 2) + (enemy_diagonal / 2)) + enemy_y
+		enemy.keep_moving = False
+
+	surface_pos = player_x,player_y
+
+
 # Main gameplay loop
 while not exit_game:
 
@@ -653,6 +683,13 @@ while not exit_game:
 		for enemy_bullet in enemy.bullet_list:
 			if enemy_bullet.x <= 0 or enemy_bullet.x >= window_width or enemy_bullet.y <= 25 or enemy_bullet.y >= window_height:
 				enemy.bullet_list.remove(enemy_bullet)
+
+	# Check if the player is colliding with the enemy
+	for enemy in enemy_list:
+		if new_surface_rect.colliderect(enemy.new_surface_rect):
+			enemiesCollide(enemy)
+		else:
+			enemy.keep_moving = True
 
 	# If there are less than 10 enemies on the screen, create a new enemy
 	current_enemy_spawner = pygame.time.get_ticks()
