@@ -285,25 +285,6 @@ if use_ps4_controller:
 	controller_button_map = ps4_controller.copy()
 	analog_axes = ps4_analog.copy()
 
-# Function that creates the enemy block
-# def createEnemyBlock():
-# 	while True:
-# 		enemy = Enemy()
-# 		r = pygame.Rect(enemy.x,enemy.y,20,20)
-#
-# 		if len(block_list) != 0:
-# 			if r.collidelist(block_list) == -1:
-# 				block_list.append(r)
-# 				return
-# 		else:
-# 			block_list.append(r)
-
-# while len(block_list) != 10:
-# 	createEnemyBlock()
-
-# enemy = Enemy(Colors["blue"])
-# enemy_list.append(enemy)
-
 # Function that rotates the surface depending on the position of the mouse
 def rotate(surface,mouse_pos,surface_pos):
 	correction_angle = 90
@@ -430,6 +411,63 @@ def enemiesCollide(enemy):
 
 	surface_pos = player_x,player_y
 
+# Functions that ensures that the enemies do not overlap each other
+def friendliesCollide(enemy1,enemy2):
+	# Calculating the length of the diagonal for the first enemy
+	enemy1_width = enemy1.new_surface_rect.width
+	enemy1_height = enemy1.new_surface_rect.height
+	enemy1_diagonal = math.sqrt((enemy1_width * enemy1_width) + (enemy1_height * enemy1_height))
+
+	# Calculating the length of the diagonal of the second enemy
+	enemy2_width = enemy2.new_surface_rect.width
+	enemy2_height = enemy2.new_surface_rect.height
+	enemy2_diagonal = math.sqrt((enemy2_width * enemy2_width) + (enemy2_height * enemy2_height))
+
+	# Calculating the distance between the two enemies
+	dx = abs(enemy1.x - enemy2.x)
+	dy = abs(enemy1.y - enemy2.y)
+
+	distance = math.sqrt((dx * dx) + (dy * dy))
+	angle = math.atan2(dy,dx)
+
+	if distance <= (enemy1_diagonal / 2) + (enemy2_diagonal / 2):
+		if isinstance(enemy1,EnemyType1):
+			enemy1.x = math.cos(angle) * ((enemy1_diagonal / 2) + (enemy2_diagonal / 2)) + enemy2.x
+			enemy1.y = math.sin(angle) * ((enemy1_diagonal / 2) + (enemy2_diagonal / 2)) + enemy2.y
+			enemy1.position = enemy1.x,enemy1.y
+		elif isinstance(enemy2,EnemyType1):
+			enemy2.x = math.cos(angle) * ((enemy1_diagonal / 2) + (enemy2_diagonal / 2)) + enemy1.x
+			enemy2.y = math.sin(angle) * ((enemy1_diagonal / 2) + (enemy2_diagonal / 2)) + enemy1.y
+			enemy2.position = enemy2.x,enemy2.y
+
+# Function that spawns the enemy and also ensures that the enemy doesn't spawn at the same position as other enemies
+def spawnEnemy():
+	new_enemy = None
+
+	while True:
+		no_collision = True
+		enemy_type = random.choice([1,2,3])
+		if enemy_type == 1:
+			new_enemy = EnemyType1(Colors["blue"])
+		elif enemy_type == 2:
+			new_enemy = EnemyType2(Colors["blue"])
+		elif enemy_type == 3:
+			new_enemy = EnemyType3(Colors["blue"])
+
+		for enemy in enemy_list:
+			enemy_width = enemy.new_surface_rect.width
+			enemy_height = enemy.new_surface_rect.height
+			enemy_radius = (math.sqrt((enemy_width * enemy_width) + (enemy_height * enemy_height))) / 2
+
+			x_clashing = enemy.x - enemy_radius <= new_enemy.x <= enemy.x + enemy_radius
+			y_clashing = enemy.y - enemy_radius <= new_enemy.y <= enemy.y + enemy_radius
+
+			if (x_clashing and y_clashing):
+					no_collision = False
+
+		if no_collision:
+			enemy_list.append(new_enemy)
+			return
 
 # Main gameplay loop
 while not exit_game:
@@ -692,23 +730,23 @@ while not exit_game:
 		else:
 			enemy.keep_moving = True
 
-	if len(enemy_list) == 0:
+	# Check if two enemies are colliding with each other
+	for i in range(0,len(enemy_list)):
+		for j in range(i + 1,len(enemy_list)):
+			if enemy_list[i].new_surface_rect.colliderect(enemy_list[j].new_surface_rect):
+				friendliesCollide(enemy_list[i],enemy_list[j])
+
+	if len(enemy_list) == 0 and num_enemies == 0:
 		num_enemies = random.choice([2,3,4])
 
 	# If there are less than 10 enemies on the screen, create a new enemy
 	current_enemy_spawner = pygame.time.get_ticks()
-	if len(enemy_list) < num_enemies:
+	# if len(enemy_list) < num_enemies:
+	if num_enemies > 0:
 		if current_enemy_spawner - start_enemy_spawner >= 1000:
 			# Spawn an enemy only after 1 second
 			start_enemy_spawner = current_enemy_spawner
-			enemy_type = random.choice([1,2,3])
-			if enemy_type == 1:
-				enemy_list.append(EnemyType1(Colors["blue"]))
-			elif enemy_type == 2:
-				enemy_list.append(EnemyType2(Colors["blue"]))
-			elif enemy_type == 3:
-				enemy_list.append(EnemyType3(Colors["blue"]))
-
+			spawnEnemy()
 			num_enemies -= 1
 
 	# --Drawing all the components on the screen--
