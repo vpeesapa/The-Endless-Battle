@@ -469,11 +469,41 @@ def spawnEnemy():
 			enemy_list.append(new_enemy)
 			return
 
-# Function that displays the game over screen when the player dies
-def gameOver():
-	global exit_game,is_game_over,surface_pos,player_color,player_health,player_score
+# Function that resets most of the global variables whenever the game is restarted
+def resetGame():
+	global is_game_over,surface_pos,player_color,player_health,player_score
 	global start_enemy_spawner,start,start_player_recovery
 	global go_up,go_down,go_right,go_left,shooting,first_hit
+
+	# Lists
+	enemy_list.clear()
+	bullet_list.clear()
+	dead_list.clear()
+
+	# Player parameters
+	surface_pos = window_center
+	player_color = Colors['green']
+	player_health = 100
+	player_score = 0
+
+	# Booleans
+	is_game_over = False
+	exit_game = False
+	go_up = False
+	go_down = False
+	go_left = False
+	go_right = False
+	shooting = False
+	first_hit = True
+
+	# Miscellaneous
+	start_enemy_spawner = pygame.time.get_ticks()
+	start = pygame.time.get_ticks()
+	start_player_recovery = pygame.time.get_ticks()
+
+# Function that displays the game over screen when the player dies
+def gameOver():
+	global exit_game
 
 	font = pygame.font.Font(None,40)
 
@@ -504,24 +534,7 @@ def gameOver():
 		# Wait for the correct button press to leave the loop
 		keys = pygame.key.get_pressed()
 		if keys[pygame.K_r]:
-			surface_pos = window_center
-			enemy_list.clear()
-			bullet_list.clear()
-			dead_list.clear()
-			is_game_over = False
-			exit_game = False
-			player_color = Colors['green']
-			player_health = 100
-			player_score = 0
-			start_enemy_spawner = pygame.time.get_ticks()
-			start = pygame.time.get_ticks()
-			start_player_recovery = pygame.time.get_ticks()
-			go_up = False
-			go_down = False
-			go_left = False
-			go_right = False
-			shooting = False
-			first_hit = True
+			resetGame()
 			break
 		if keys[pygame.K_x]:
 			exit_game = True
