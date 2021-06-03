@@ -57,6 +57,7 @@ $ python3 game.py
 * Multiple enemies will appear on screen at once.
 * Enemies can bump into each other without one of them gobbling up the other.
 * There is now a game over screen that lets the player to either restart or exit the game after dying once.
+* There is now a start menu that allows the player to voluntarily enter the game.
 
 ## Alert: There are things that are yet to be implemented
 * ~~Implement one type of enemy - one that's about the same size as the player but shoots and relentlessly follows the player (Still need to implement logic for when the player gets hit by an enemy bullet).~~
