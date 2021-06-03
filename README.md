@@ -19,7 +19,7 @@ Varun Peesapati
     - Left analog stick/D-Pad: Moves the player within the bounds of the screen.
     - R1: Fire bullets (**Hold to fire continuously**)
     - Right analog stick: Aim.
-    - X: Exit game
+    - X: Exit game.
 
 ## Organization of project
 ``` bash
