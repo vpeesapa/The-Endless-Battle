@@ -582,6 +582,45 @@ def startMenu():
 		pygame.display.update()
 		clock.tick(15)
 
+def pauseGame():
+	global exit_game
+
+	font = pygame.font.Font(None,40)
+
+	while True:
+		for event in pygame.event.get():
+			# If the user did something
+			if event.type == pygame.QUIT:
+				# The user voluntarily closed the window
+				exit_game = True
+				return
+
+		window.fill(Colors["black"])
+
+		text = font.render("You are only delaying the inevitable...",1,Colors["red"])
+		textRect = text.get_rect()
+		textRect.center = (window_width / 2,(window_height / 2) - 40)
+		window.blit(text,textRect)
+
+		text = font.render("Press r to resume or x to quit like the wimp that you are",1,Colors["white"])
+		textRect = text.get_rect()
+		textRect.center = (window_width / 2,(window_height / 2) + 40)
+		window.blit(text,textRect)
+
+		# Wait for the correct button press to leave the loop
+		keys = pygame.key.get_pressed()
+		if keys[pygame.K_r]:
+			# Resumes the game
+			exit_game = False
+			break
+		if keys[pygame.K_x]:
+			# Exits from the game
+			exit_game = True
+			break
+
+		pygame.display.update()
+		clock.tick(15)
+
 startMenu()
 
 # Main gameplay loop
@@ -601,6 +640,9 @@ while not exit_game:
 			if event.key == pygame.K_x:
 				# If x is pressed the game closes
 				exit_game = True
+			if event.key == pygame.K_SPACE:
+				# If the player chooses to pause the game
+				pauseGame()
 			if event.key == pygame.K_UP or event.key == pygame.K_w:
 				# If the up arrow key or 'w' is pressed
 				go_up = True
@@ -889,6 +931,9 @@ while not exit_game:
 
 	text = font.render("Health: " + str(player_health) + "%",1,player_color)
 	window.blit(text,((window_width / 2) - 60,0))
+
+	text = font.render("\'Space\' to pause",1,Colors["white"])
+	window.blit(text,((window_width / 2) + 200,0))
 
 	# Drawing a line that differentiates between the game and the HUD
 	pygame.draw.line(window,Colors["white"],(0,25),(window_width,25))
