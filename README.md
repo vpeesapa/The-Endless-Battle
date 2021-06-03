@@ -14,6 +14,7 @@ Varun Peesapati
     - W,A,S,D/&#8592;,&#8593;,&#8594;,&#8595;: Moves the player within the bounds of the screen.
     - Mouse(left click): Fire bullets (**Hold to fire continuously**).
     - Mouse(movement): Aim.
+    - Space: Pause game.
     - X: Exit game.
 * Controllers (**Currently tested with only PS4 controllers**):
     - Left analog stick/D-Pad: Moves the player within the bounds of the screen.
@@ -58,6 +59,7 @@ $ python3 game.py
 * Enemies can bump into each other without one of them gobbling up the other.
 * There is now a game over screen that lets the player to either restart or exit the game after dying once.
 * There is now a start menu that allows the player to voluntarily enter the game.
+* The game can now be paused at any time by pressing the space bar.
 
 ## Alert: There are things that are yet to be implemented
 * ~~Implement one type of enemy - one that's about the same size as the player but shoots and relentlessly follows the player (Still need to implement logic for when the player gets hit by an enemy bullet).~~
