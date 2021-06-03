@@ -3,6 +3,7 @@
 import pygame
 import math
 import random
+import time
 from colors import Colors
 from controllers import ps4_controller,ps4_analog
 
@@ -240,7 +241,6 @@ go_down = False
 go_left = False
 go_right = False
 exit_game = False
-is_game_over = False
 mouse_read = True
 first_hit = True
 use_ps4_controller = False
@@ -471,7 +471,7 @@ def spawnEnemy():
 
 # Function that resets most of the global variables whenever the game is restarted
 def resetGame():
-	global is_game_over,surface_pos,player_color,player_health,player_score
+	global surface_pos,player_color,player_health,player_score
 	global start_enemy_spawner,start,start_player_recovery
 	global go_up,go_down,go_right,go_left,shooting,first_hit
 
@@ -487,8 +487,6 @@ def resetGame():
 	player_score = 0
 
 	# Booleans
-	is_game_over = False
-	exit_game = False
 	go_up = False
 	go_down = False
 	go_left = False
@@ -534,14 +532,58 @@ def gameOver():
 		# Wait for the correct button press to leave the loop
 		keys = pygame.key.get_pressed()
 		if keys[pygame.K_r]:
+			# Restarts the game
+			exit_game = False
 			resetGame()
 			break
 		if keys[pygame.K_x]:
+			# Exits from the game
 			exit_game = True
 			break
 
 		pygame.display.update()
 		clock.tick(15)
+
+# Function that displays the main menu
+def startMenu():
+	global exit_game
+
+	while True:
+		for event in pygame.event.get():
+			# If the user did something
+			if event.type == pygame.QUIT:
+				# The user voluntarily closed the window
+				exit_game = True
+				return
+			if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+				# The user pressed a key to start playing
+				return
+
+		window.fill(Colors["black"])
+
+		# Displays the title
+		font = pygame.font.Font(None,80)
+		text = font.render("The Endless Battle",1,Colors["red"])
+		textRect = text.get_rect()
+		textRect.center = (window_width / 2,(window_height / 2) - 80)
+		window.blit(text,textRect)
+
+		# Displays the player
+		player_rect = player_surface.get_rect(center = window_center)
+		window.blit(player_surface,player_rect.topleft)
+		points = ((surface_width / 2,0),(0,surface_height),(surface_width,surface_height))
+		pygame.draw.polygon(player_surface,player_color,points)
+
+		font = pygame.font.Font(None,40)
+		text = font.render("Press any key to start this futile battle",1,Colors["white"])
+		textRect = text.get_rect()
+		textRect.center = (window_width / 2,(window_height / 2) + 80)
+		window.blit(text,textRect)
+
+		pygame.display.update()
+		clock.tick(15)
+
+startMenu()
 
 # Main gameplay loop
 while not exit_game:
@@ -756,9 +798,6 @@ while not exit_game:
 					player_color = Colors["orange"]
 				elif 0 < player_health <= 20:
 					player_color = Colors["red"]
-				else:
-					is_game_over = True
-					# exit_game = True
 
 	current_recovery_time = pygame.time.get_ticks()
 	for dead_bullet in dead_list:
@@ -781,9 +820,6 @@ while not exit_game:
 				player_color = Colors["orange"]
 			elif 0 < player_health <= 20:
 				player_color = Colors["red"]
-			else:
-				is_game_over = True
-				# exit_game = True
 
 	# Checking if the bullets are going out-of-bounds
 	for bullet in bullet_list:
@@ -826,39 +862,40 @@ while not exit_game:
 			num_enemies -= 1
 
 	# --Drawing all the components on the screen--
-	if not is_game_over:
-		window.fill(Colors["black"])
+	window.fill(Colors["black"])
 
-		# Drawing the enemy
-		for enemy in enemy_list:
-			enemy.drawEnemy()
+	# Drawing the enemy
+	for enemy in enemy_list:
+		enemy.drawEnemy()
 
-		# Drawing the player and their bullets
-		recovery_diff = current_recovery_time - start_player_recovery
-		drawPlayer(player_surface,new_surface,new_surface_rect,recovery_diff)
+	# Drawing the player and their bullets
+	recovery_diff = current_recovery_time - start_player_recovery
+	drawPlayer(player_surface,new_surface,new_surface_rect,recovery_diff)
 
-		# Drawing the player's bullet
-		for bullet in bullet_list:
-			pygame.draw.circle(window,bullet.color,(bullet.x,bullet.y),bullet.radius)
+	# Drawing the player's bullet
+	for bullet in bullet_list:
+		pygame.draw.circle(window,bullet.color,(bullet.x,bullet.y),bullet.radius)
 
-		# Drawing the enemy's bullet
-		for enemy in enemy_list:
-			for enemy_bullet in enemy.bullet_list:
-				pygame.draw.circle(window,enemy_bullet.color,(enemy_bullet.x,enemy_bullet.y),enemy_bullet.radius)
+	# Drawing the enemy's bullet
+	for enemy in enemy_list:
+		for enemy_bullet in enemy.bullet_list:
+			pygame.draw.circle(window,enemy_bullet.color,(enemy_bullet.x,enemy_bullet.y),enemy_bullet.radius)
 
-		for dead_bullet in dead_list:
-			pygame.draw.circle(window,dead_bullet.color,(dead_bullet.x,dead_bullet.y),dead_bullet.radius)
+	for dead_bullet in dead_list:
+		pygame.draw.circle(window,dead_bullet.color,(dead_bullet.x,dead_bullet.y),dead_bullet.radius)
 
-		# Displaying the player's score and health at the top of the screen
-		text = font.render("Score: " + str(player_score),1,Colors["white"])
-		window.blit(text,(0,0))
+	# Displaying the player's score and health at the top of the screen
+	text = font.render("Score: " + str(player_score),1,Colors["white"])
+	window.blit(text,(0,0))
 
-		text = font.render("Health: " + str(player_health) + "%",1,player_color)
-		window.blit(text,((window_width / 2) - 60,0))
+	text = font.render("Health: " + str(player_health) + "%",1,player_color)
+	window.blit(text,((window_width / 2) - 60,0))
 
-		# Drawing a line that differentiates between the game and the HUD
-		pygame.draw.line(window,Colors["white"],(0,25),(window_width,25))
-	else:
+	# Drawing a line that differentiates between the game and the HUD
+	pygame.draw.line(window,Colors["white"],(0,25),(window_width,25))
+
+	# Displays the game over screen when the player's health reaches 0
+	if player_health <= 0:
 		gameOver()
 
 	# --Updating the screen with whatever has been drawn so far--
