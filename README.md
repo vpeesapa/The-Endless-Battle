@@ -71,7 +71,7 @@ $ python3 game.py
 * ~~Give some time for the player to recover before it can take more damage.~~
 * ~~Display score and player's health at the top of the screen.~~
 * ~~Consider logic when either the player collides with the enemy or two enemies collide with each other while following the player.~~
-* Have a UI (eg. a start menu, pause menu, etc.).
+* ~~Have a UI (eg. a start menu, pause menu, etc.).~~
 * Change button mappings for XBox controllers.
 * ~~Update README with details of the completed project.~~
 
