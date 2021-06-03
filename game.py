@@ -3,7 +3,6 @@
 import pygame
 import math
 import random
-import time
 from colors import Colors
 from controllers import ps4_controller,ps4_analog
 
