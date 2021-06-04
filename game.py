@@ -583,7 +583,7 @@ def startMenu():
 		clock.tick(15)
 
 def pauseGame():
-	global exit_game
+	global exit_game,shooting
 
 	font = pygame.font.Font(None,40)
 
@@ -612,6 +612,7 @@ def pauseGame():
 		if keys[pygame.K_r]:
 			# Resumes the game
 			exit_game = False
+			shooting = False
 			break
 		if keys[pygame.K_x]:
 			# Exits from the game
