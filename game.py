@@ -147,18 +147,16 @@ class EnemyType2(Enemy):
 	# Function which makes the enemy fire bullets
 	def fireBullet(self):
 		bullet_color = random.choice([Colors["silver"],Colors["magenta"]])
-		bullet_dest_1 = ((math.cos(math.radians(self.angle)) * 15 + self.x),(math.sin(math.radians(self.angle)) * 15 + self.y))
-		enemy_bullet_1 = Bullet(bullet_color,self.new_surface_rect.center,5,bullet_dest_1,2,20)
-		self.bullet_list.append(enemy_bullet_1)
-		bullet_dest_2 = (((-1) * math.cos(math.radians(self.angle)) * 15 + self.x),((-1) * math.sin(math.radians(self.angle)) * 15 + self.y))
-		enemy_bullet_2 = Bullet(bullet_color,self.new_surface_rect.center,5,bullet_dest_2,2,20)
-		self.bullet_list.append(enemy_bullet_2)
-		bullet_dest_3 = ((math.cos(math.radians(self.angle - 90)) * 15 + self.x),(math.sin(math.radians(self.angle - 90)) * 15 + self.y))
-		enemy_bullet_3 = Bullet(bullet_color,self.new_surface_rect.center,5,bullet_dest_3,2,20)
-		self.bullet_list.append(enemy_bullet_3)
-		bullet_dest_4 = (((-1) * math.cos(math.radians(self.angle - 90)) * 15 + self.x),((-1) * math.sin(math.radians(self.angle - 90)) * 15 + self.y))
-		enemy_bullet_4 = Bullet(bullet_color,self.new_surface_rect.center,5,bullet_dest_4,2,20)
-		self.bullet_list.append(enemy_bullet_4)
+		angles = [self.angle,(self.angle - 90)]
+
+		# Creates bullets at the specified angles
+		for angle in angles:
+			bullet_dest_1 = ((math.cos(math.radians(angle)) * 15 + self.x),(math.sin(math.radians(angle)) * 15 + self.y))
+			enemy_bullet_1 = Bullet(bullet_color,self.new_surface_rect.center,5,bullet_dest_1,2,20)
+			self.bullet_list.append(enemy_bullet_1)
+			bullet_dest_2 = (((-1) * math.cos(math.radians(angle)) * 15 + self.x),((-1) * math.sin(math.radians(angle)) * 15 + self.y))
+			enemy_bullet_2 = Bullet(bullet_color,self.new_surface_rect.center,5,bullet_dest_2,2,20)
+			self.bullet_list.append(enemy_bullet_2)
 
 	# Function that draws the enemy onto the screen
 	def drawEnemy(self):
