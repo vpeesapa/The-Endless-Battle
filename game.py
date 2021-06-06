@@ -134,7 +134,7 @@ class EnemyType2(Enemy):
 		self.hitbox = pygame.Rect(self.position[0] - 15,self.position[1] - 15,30,30)
 		self.radius = 15
 		self.new_surface_rect = self.surface.get_rect(center = self.position)
-		self.angle = 0
+		self.angle = random.randrange(0,360)
 		# Bullets are fired at an interval of 0.3s
 		self.bullet_frequency = 300
 
